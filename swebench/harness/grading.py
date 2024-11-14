@@ -162,6 +162,10 @@ def get_eval_tests_report(
             },
         }
     )
+
+    results.update({
+        "all_tests_sm": eval_sm,
+    })
     return results
 
 
