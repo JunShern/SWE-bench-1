@@ -345,7 +345,8 @@ def get_dataset_from_preds(
         print(f"{len(completed_ids)} instances already run, skipping...")
         dataset = [i for i in dataset if i[KEY_INSTANCE_ID] not in completed_ids]
 
-    empty_patch_ids = {k for k, v in predictions.items() if v["model_patch"] == "" or v["model_patch"] is None}
+    # empty_patch_ids = {k for k, v in predictions.items() if v["model_patch"] == "" or v["model_patch"] is None}
+    empty_patch_ids = set()
 
     # filter dataset to only instances with predictions
     dataset = [i for i in dataset if i[KEY_INSTANCE_ID] in prediction_ids and i[KEY_INSTANCE_ID] not in empty_patch_ids]
@@ -483,6 +484,19 @@ def get_gold_predictions(dataset_name: str, split: str):
         } for datum in dataset
     ]
 
+def get_baseline_predictions(dataset_name: str, split: str):
+    """
+    Get baseline predictions for the given dataset and split.
+    """
+    dataset = load_swebench_dataset(dataset_name, split)
+    return [
+        {
+            KEY_INSTANCE_ID: datum[KEY_INSTANCE_ID],
+            "model_patch": "",
+            "model_name_or_path": "baseline",
+        } for datum in dataset
+    ]
+
 
 def main(
         dataset_name: str,
@@ -509,6 +523,9 @@ def main(
     if predictions_path == 'gold':
         print("Using gold predictions - ignoring predictions_path")
         predictions = get_gold_predictions(dataset_name, split)
+    elif predictions_path == 'baseline':
+        print("Don't apply any changes (baseline) - ignoring predictions_path")
+        predictions = get_baseline_predictions(dataset_name, split)
     else:
         if predictions_path.endswith(".json"):
             with open(predictions_path, "r") as f:
